@@ -1,0 +1,54 @@
+[
+    {
+        "id": "1",
+        "title": "Product Satisfaction Survey",
+        "length": "10 mins",
+        "description": "To better understand the needs and find improvement points.",
+        "survey_owner": "Company A",
+        "data_sensitivy": "Low",
+        "content": [
+            {
+                "id": "1",
+                "question": "Product Name",
+                "answer": "" 
+            },
+            {
+                "id": "2",
+                "question": "Purchased From",
+                "answer": ""
+            },
+            {
+                "id": "3",
+                "question": "Overall how satisfied are you with the product?",
+                "answer": "",
+                "suggestions": "Very Satisfied, A bit Satisfied, Neutral, Dissatisfied, Very Dissastisfied"
+            }
+        ]
+    },
+    {
+        "id": "2",
+        "title": "Vacation Travel Survey",
+        "length": "5 mins",
+        "description": "To understand traveller's behaviors and preferences.",
+        "survey_owner": "Company B",
+        "data_sensitivity": "High",
+        "content": [
+            {
+                "id": "1",
+                "question": "What is your age?",
+                "answer": "" 
+            },
+            {
+                "id": "2",
+                "question": "Any medical conditions?",
+                "answer": ""
+            },
+            {
+                "id": "3",
+                "question": "Where do you go most often?",
+                "answer": "",
+                "suggestions": "Hill Stations, Beaches, Deserts, Historically Significant Places, Commercially Busy Cities"
+            } 
+        ]
+    }
+]
