@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { NFTStorage } from "nft.storage";
 
 import Button from "react-bootstrap/Button";
 import Card from "react-bootstrap/Card";
@@ -7,65 +6,90 @@ import Container from "react-bootstrap/Container";
 import Stack from "react-bootstrap/Stack";
 import Toast from "react-bootstrap/Toast";
 
-import surveys from "../data/sample_survey.json";
-
 import { SurveyPopUp } from "../components/SurveyPopUp";
+import { SurveyCreationPopUp } from "../components/SurveyCreationPopUp";
 
-export function SurveyPage({ selectedAddress, networkConnected, balance }) {
-  const [allValues, setAllValues] = useState({
+export function SurveyPage({
+  surveys,
+  selectedAddress,
+  networkConnected,
+  balance,
+  onCreateSurvey,
+  onBeginSurvey,
+}) {
+  // Taking Survey: identify which survey is selected
+  const [selectedValues, setSelectedValues] = useState({
     modalShow: false,
-    data: {}
+    data: {},
   });
 
-  // instantiate NFT Storage client
-  const client = new NFTStorage({
-    token: process.env.REACT_APP_NFT_STORAGE_API_KEY
+  // Survey Creation: for new survey
+  const [newSurvey, setNewSurvey] = useState({
+    modalShow: false,
+    data: {},
   });
 
+  // Survey List to display
+  const [surveyList, setSurveyList] = useState([]);
+
+  // to populate surveys when surveys reference changed
   useEffect(() => {
-    console.log(allValues);
-  });
+    setSurveyList(surveys);
+  }, [surveys]);
 
-  // using NFT Storage client to store the text file and metadata object
-  // of the survey answer text file on IPFS
-  async function _store(data) {
-    const fileCid = await client.storeBlob(new Blob([data]));
-    const fileUrl = (await "https://ipfs.io/ipfs/") + fileCid;
-
-    const obj = {
-      title: "Survey Answer Metadata",
-      type: "text",
-      file_url: fileUrl
-    };
-
-    const metadata = new Blob([JSON.stringify(obj)], {
-      type: "application/json"
-    });
-    const metadataCid = await client.storeBlob(metadata);
-    const metadataUrl = "https://ipfs.io/ipfs/" + metadataCid;
-
-    return metadataUrl;
-  }
-
-  async function _tokenizeNFT() {}
-
+  // Taking Survey
   async function _takeSurvey(events) {
-    const metadataUrl = await _store(events);
-
-    // replace with Toast later
-    console.log("Stored NFT successfully!\nMetadata URL: ", metadataUrl);
+    onBeginSurvey(events);
   }
 
-  function _createSurvey() {}
+  // Survey Creation:
+  // update surveylist state and refresh display of survey page
+  // Note: HARDCODED Data to be removed!!!
+  function _createSurvey(events) {
+    console.log("survey created");
+
+    onCreateSurvey({
+      title: "abcd",
+      length: "efgh",
+      description: "ijkl",
+      survey_owner: "mno",
+      closing_date: "1640672139",
+      total_rewards_eth: "1",
+      reward_eth: "0.00001",
+      id: "64bac1-eec-d08f-cf5-00e526c1a0b8",
+      content: [
+        {
+          question: "how are you?",
+          suggestion: "well, okay, bad",
+        },
+        {
+          question: "hello?",
+          suggestion: "",
+        },
+        {
+          question: "pqrz",
+          suggestion: "",
+        },
+      ],
+    });
+  }
 
   return (
     <Container>
       <SurveyPopUp
-        survey={allValues.data}
+        survey={selectedValues.data}
         onSubmit={_takeSurvey}
-        onShow={allValues.modalShow}
-        onHide={() => setAllValues({ ...allValues, modalShow: false })}
+        onShow={selectedValues.modalShow}
+        onHide={() =>
+          setSelectedValues({ ...selectedValues, modalShow: false })
+        }
       ></SurveyPopUp>
+      <SurveyCreationPopUp
+        survey={newSurvey.data}
+        onSubmit={_createSurvey}
+        onShow={newSurvey.modalShow}
+        onHide={() => setNewSurvey({ ...newSurvey, modalShow: false })}
+      ></SurveyCreationPopUp>
       <Stack gap={4}>
         <Card>
           <Card.Body>
@@ -78,7 +102,15 @@ export function SurveyPage({ selectedAddress, networkConnected, balance }) {
           <Button
             className="border ms-auto"
             variant="primary"
-            onClick={_createSurvey}
+            // onClick={() => {
+            //   setNewSurvey({
+            //     ...newSurvey,
+            //     modalShow: true,
+            //   });
+            // }}
+            onClick={() => {
+              _createSurvey();
+            }}
           >
             Create Survey
           </Button>
@@ -88,7 +120,7 @@ export function SurveyPage({ selectedAddress, networkConnected, balance }) {
           </Button>
         </Stack>
         <Stack gap={1}>
-          {surveys.map((data) => (
+          {surveyList.map((data) => (
             <Card key={data.id}>
               <Card.Body>
                 <Stack direction="horizontal">
@@ -97,10 +129,10 @@ export function SurveyPage({ selectedAddress, networkConnected, balance }) {
                     className="ms-auto"
                     variant="secondary"
                     onClick={() => {
-                      setAllValues({
-                        ...allValues,
+                      setSelectedValues({
+                        ...selectedValues,
                         data: data,
-                        modalShow: true
+                        modalShow: true,
                       });
                     }}
                   >
