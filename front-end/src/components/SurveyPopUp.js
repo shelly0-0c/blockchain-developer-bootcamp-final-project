@@ -5,16 +5,22 @@ import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 
 export function SurveyPopUp({ survey, onShow, onHide, onSubmit }) {
-  // console.log(survey);
   const [item_1, setItem1] = useState("");
   const [item_2, setItem2] = useState("");
   const [item_3, setItem3] = useState("");
 
-  function retrieveInputs(event) {
+  function handleSubmit() {
     const allValues = [item_1, item_2, item_3];
     const formatted = formatAnswer(allValues);
+
+    const survey_response = {
+      id: survey.id,
+      title: survey.title,
+      response: formatted,
+    };
+
     onHide(true);
-    onSubmit(formatted);
+    onSubmit(survey_response);
   }
 
   function formatAnswer(allValues_arr) {
@@ -24,11 +30,11 @@ export function SurveyPopUp({ survey, onShow, onHide, onSubmit }) {
       const data_obj = {
         id: value.id,
         question: value.question,
-        answer: allValues_arr[index]
+        answer: allValues_arr[index],
       };
       survey_content.push(data_obj);
     });
-    return JSON.stringify(survey_content);
+    return survey_content;
   }
 
   return (
@@ -41,7 +47,7 @@ export function SurveyPopUp({ survey, onShow, onHide, onSubmit }) {
     >
       <Modal.Header closeButton>
         <Modal.Title id="contained-modal-title-vcenter">
-          Modal heading
+          {survey.title}
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>
@@ -108,7 +114,7 @@ export function SurveyPopUp({ survey, onShow, onHide, onSubmit }) {
         )}
       </Modal.Body>
       <Modal.Footer>
-        <Button variant="primary" type="submit" onClick={retrieveInputs}>
+        <Button variant="primary" type="submit" onClick={handleSubmit}>
           Tokenize & Submit
         </Button>
       </Modal.Footer>
