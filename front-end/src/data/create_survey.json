@@ -1,0 +1,31 @@
+[
+    {
+        "id": "1",
+        "title": "Price Testing Survey",
+        "length": "5 mins",
+        "description": "To build effective pricing strategy for the product",
+        "survey_owner": "Company C",
+        "data_sensitivy": "Low",
+        "closing_date": "1640746742",
+        "total_rewards_wei": "1000000000000000000",
+        "reward_wei": "1000000",
+        "content": [
+            {
+                "id": "1",
+                "question": "What do you think about the product?",
+                "answer": "" 
+            },
+            {
+                "id": "2",
+                "question": "How often do you purchase this product category?",
+                "answer": "",
+                "suggestions": "Several times a week, About once a week, Several times a month, About once a month, Less than once a month, Never"
+            },
+            {
+                "id": "3",
+                "question": "Which brand(s) do you typically buy?",
+                "answer": ""
+            }
+        ]
+    }
+]
