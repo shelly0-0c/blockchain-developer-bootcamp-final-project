@@ -44,8 +44,6 @@ contract("SurveyProcessor", (accounts) => {
       rewardWei = "100000000000000"; // 0.0001 ETH
       closingDateUnix = "1643532271";
 
-      // var companyABalance = await web3.eth.getBalance(companyA);
-
       tx = await spInstance.registerSurvey(
         surveyId,
         totalRewardsWei,
@@ -97,29 +95,29 @@ contract("SurveyProcessor", (accounts) => {
       );
     });
 
-    it("should add all surveys for each address to surveyCreators mapping", async () => {
-      const surveyId = "e91570ac-6b8f-11ec-90d6-0242ac120003";
-      const totalRewardsWei = "20000000000000000"; // 0.02 ETH
-      const rewardWei = "200000000000000"; // 0.0002 ETH
-      const closingDateUnix = "1643752276";
+    // it("should add all surveys for each address to surveyCreators mapping", async () => {
+    //   const surveyId = "e91570ac-6b8f-11ec-90d6-0242ac120003";
+    //   const totalRewardsWei = "20000000000000000"; // 0.02 ETH
+    //   const rewardWei = "200000000000000"; // 0.0002 ETH
+    //   const closingDateUnix = "1643752276";
 
-      await spInstance.registerSurvey(
-        surveyId,
-        totalRewardsWei,
-        rewardWei,
-        closingDateUnix,
-        { from: companyA, value: totalRewardsWei }
-      );
+    //   await spInstance.registerSurvey(
+    //     surveyId,
+    //     totalRewardsWei,
+    //     rewardWei,
+    //     closingDateUnix,
+    //     { from: companyA, value: totalRewardsWei }
+    //   );
 
-      let storedSurveysByCreator = await spInstance.surveysOf(companyA);
+    //   let storedSurveysByCreator = await spInstance.surveysOf(companyA);
 
-      const expectedSurveys = [
-        "13e484ae-6b21-11ec-90d6-0242ac120003",
-        "e91570ac-6b8f-11ec-90d6-0242ac120003",
-      ];
+    //   const expectedSurveys = [
+    //     "13e484ae-6b21-11ec-90d6-0242ac120003",
+    //     "e91570ac-6b8f-11ec-90d6-0242ac120003",
+    //   ];
 
-      expect(storedSurveysByCreator).to.have.members(expectedSurveys);
-    });
+    //   expect(storedSurveysByCreator).to.have.members(expectedSurveys);
+    // });
 
     it("should have reward in ETH deposited to Reward Escrow contract", async () => {
       let rewardEscrowBalanceAfter = await web3.eth.getBalance(
@@ -212,13 +210,15 @@ contract("SurveyProcessor", (accounts) => {
 
   // TODO:
 
-  //   describe("respond to new survey", () => {
-  //     it("should", async () => {});
+  describe("respond to new survey", () => {
+    it("should record deductable amount from reward pool for each survey answer", async () => {});
 
-  //     it("should", async () => {});
+    it("should record address who took the survey", async () => {});
 
-  //     it("should emit a Log", async () => {});
-  //   });
+    it("should not allow survey owner to take own survey", async () => {});
+
+    it("should emit a Log", async () => {});
+  });
 
   //   describe("same survey taker respond again to same survey", () => {
   //     it("should error that", async () => {});
@@ -228,13 +228,19 @@ contract("SurveyProcessor", (accounts) => {
   //     it("should emit a Log", async () => {});
   //   });
 
-  //   describe("survey owner removes survey", () => {
-  //     it("should allow the owner who created the survey to delete", async () => {});
+  describe("when survey is closed", () => {
+    it("should only allow the owner who created the survey to withdraw remaining credits from reward escrow", async () => {});
 
-  //     it("should revert ", async () => {});
+    it("should remove survey from surveys mapping", async () => {});
 
-  //     it("should emit a Log", async () => {});
-  //   });
+    it("should remove survey from surveyOwners mapping", async () => {});
+
+    it("should remove survey from rewardPools mapping", async () => {});
+
+    it("should refund back the remaining amount from reward pool to survey owner after deductibles", async () => {});
+
+    it("should emit a Log", async () => {});
+  });
 
   //   describe("survey taker removes survey", () => {
   //     it("should error that the caller does not have the permission", async () => {});
