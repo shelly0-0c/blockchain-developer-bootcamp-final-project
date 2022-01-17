@@ -1,22 +1,29 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity >=0.5.16 <0.9.0;
 pragma experimental ABIEncoderV2;         // enabled to encode and decode nested arrays and structs, code will be less optimized
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+
 
 contract RewardEscrow {
+
+    using SafeMath for uint256;
 
     // @notice Reward pool belongs to survey creator
     // @dev if more attributes are needed, update accordingly
     struct RewardPoolInfo {
         address payable erc20Address;       // address of ERC20 token contract where the funds are withdrawn from to distribute as reward 
-        uint256 totalRewards;            // amount of DAI allocated for rewarding survey responses
-        uint256 rewardPerResponse;  // DAI reward amount per survey response 
+        uint256 totalRewards;          // amount of ETH allocated for rewarding survey responses
+        uint256 rewardPerResponse;     // ETH reward amount per survey response 
     }
 
     // @notice Survey processor contract address
     address payable internal agent;
 
     // @notice Surveys owned by survey creator
-    mapping (address => string[]) internal surveyOwners;
+    // mapping (address => string[]) internal surveyOwners;
+
+    // @notice Surveys owned by survey creator
+    mapping (string => address) internal surveyOwners;
 
     // @notice RewardPoolInfo for each survey id
     mapping (string => RewardPoolInfo) internal rewardPools;
@@ -43,7 +50,7 @@ contract RewardEscrow {
     // @notice Emitted when unused rewards are refunded to Survey Creator
     // @param surveyId Survey Process Contract address
     // @param to Survey Creator address
-    event LogUnusedRewardRefund(string surveyId, address to);
+    event LogReturnRemainingCredit(string surveyId, address to);
     
     // @notice Emitted when reward pool information is set by Survey Processor Contract
     // @param surveyId Survey Process Contract address
@@ -69,9 +76,15 @@ contract RewardEscrow {
         _;
     }
 
-    modifier onlySurveyOwner() {
-        require(surveyOwners[msg.sender].length > 0, "No surveys belong to this wallet address");
+    modifier surveyOwnerExists(string memory _surveyId) {
+        require(surveyOwners[_surveyId]!= address(0), "Survey Owner not found");
         _;
+    }
+
+    // @notice Retrieve address of Survey Processor Contract
+    // @return agent Address of the Survey Processor Contract
+    function getAgent() public view returns(address) {
+        return agent;
     }
 
     // @notice Assign Survey Processor Contract address to agent
@@ -81,16 +94,17 @@ contract RewardEscrow {
         agent = _address;
     }
 
-    // @notice Retrieve address of Survey Processor Contract
-    // @return agent Address of the Survey Processor Contract
-    function getAgent() public view returns(address) {
-        return agent;
-    }
-
     // @notice Total ETH in RewardEscrow contract address escrowed by Survey Creators
     // @return Balance of ETH in Reward Escrow contract
-    function getBalance() external view returns(uint256) {
+    function getEscrowContractBalance() public view returns(uint256) {
         return address(this).balance;
+    }
+
+    // @notice Retrieve Reward Pool Information of a particular survey
+    // @param _surveyId Survey ID
+    // @return pool Stored RewardPoolInfo struct
+    function getRewardPoolInfo(string memory _surveyId) external view returns(RewardPoolInfo memory)  {
+        return rewardPools[_surveyId];
     }
 
     // @notice Save Reward Pool Information belongs to Survey Creator
@@ -98,43 +112,50 @@ contract RewardEscrow {
     // @param _surveyId Survey ID
     // @return true When all the steps are executed successfully
     function setRewardPoolInfo(RewardPoolInfo memory _rewardPool, string memory _surveyId) external payable returns (bool) {
-        // bytes memory _surveyIdBytes = bytes(_surveyId);
         rewardPools[_surveyId] = _rewardPool;
-        // RewardPoolInfo storage pool = rewardPools[_surveyId];
-        // pool.erc20Address = _rewardPool.erc20Address;
-        // pool.balance = _rewardPool.balance;
-        // pool.rewardPerResponse = _rewardPool.rewardPerResponse;
 
-        // uint256 _totalRewards = _rewardPool.balance;
         emit LogRewardPoolInfoSet(_surveyId, msg.sender, msg.value);
-
         return true;
     }
 
-    // @notice Retrieve Reward Pool Information of a particular survey
+    // @notice Retrieve Survey Owner of a particular survey
     // @param _surveyId Survey ID
-    // @return pool Stored RewardPoolInfo struct
-    function getRewardPoolInfo(string memory _surveyId) external view returns(RewardPoolInfo memory)  {
-
-        // RewardPoolInfo memory pool = rewardPools[_surveyId];
-        // emit LogRewardPoolInfoGet(_surveyId, pool.erc20Address, pool.totalRewards);
-        // RewardPoolInfo memory pool = rewardPools[_surveyId];
-        return rewardPools[_surveyId];
+    function getSurveyOwner(string memory _surveyId) external view returns (address) {
+        return surveyOwners[_surveyId];
     }
 
-    // @notice
-    // @dev
-    // @param
-    // @param
-    function withdrawReward(string calldata _surveyId) external onlySurveyOwner {
+    function setSurveyOwner(string memory _surveyId, address _owner) public {
+        surveyOwners[_surveyId] = _owner;
     }
 
-    // @notice
-    // @dev
-    // @param
-    // @param
-    function refundRemaining(string calldata _surveyId) external onlySurveyOwner {
-        emit LogUnusedRewardRefund(_surveyId, msg.sender);
+
+
+    // @notice Claim cumulative rewards from surveys taken
+    // @dev TODO: Only Survey Takers can call this function successfully, need to do deletegate call in survey processor
+    // @param _surveyId Survey ID
+    function redeemReward(string calldata _surveyId) external {
+        //TODO
+    }
+
+    // @notice Refund excess ETH, allocated for survey to Survey Owner
+    // @dev TODO: Only Survey Owners can call this function successfully, need to do delegate call in survey processor
+    // @param _surveyId Survey ID
+    // @param _totalResponses Total number of survey responses
+    // @return true if the executions are successful and the end of the function is reached
+    function refundRemaining(string memory _surveyId, uint256 _totalResponses) external payable returns (bool) {
+
+        uint256 escrowContractBalanceBefore = getEscrowContractBalance();
+        uint256 amountToRefund = rewardPools[_surveyId].totalRewards.sub(_totalResponses.mul(rewardPools[_surveyId].rewardPerResponse));
+        payable(rewardPools[_surveyId].erc20Address).transfer(amountToRefund);
+        
+        if (_totalResponses > 0) {
+            // if the transfer to Survey Owner succeeds, ETH balance of Reward Escrow before and after should be different
+            assert(escrowContractBalanceBefore > getEscrowContractBalance());
+        }
+
+        emit LogReturnRemainingCredit(_surveyId, rewardPools[_surveyId].erc20Address);
+        
+        return true;
     }
 
 }
