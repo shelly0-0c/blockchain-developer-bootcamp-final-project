@@ -8,14 +8,17 @@ import Toast from "react-bootstrap/Toast";
 
 import { SurveyPopUp } from "../components/SurveyPopUp";
 import { SurveyCreationPopUp } from "../components/SurveyCreationPopUp";
+import { SurveyRefundPopUp } from "../components/SurveyRefundPopUp";
 
 export function SurveyPage({
   surveys,
+  escrowAddress,
   selectedAddress,
-  networkConnected,
+  network,
   balance,
   onCreateSurvey,
-  onBeginSurvey,
+  onTakeSurvey,
+  onRefund,
 }) {
   // Taking Survey: identify which survey is selected
   const [selectedValues, setSelectedValues] = useState({
@@ -25,6 +28,12 @@ export function SurveyPage({
 
   // Survey Creation: for new survey
   const [newSurvey, setNewSurvey] = useState({
+    modalShow: false,
+    data: {},
+  });
+
+  // Closing Survey
+  const [refundValues, setRefundValues] = useState({
     modalShow: false,
     data: {},
   });
@@ -39,44 +48,25 @@ export function SurveyPage({
 
   // Taking Survey
   async function _takeSurvey(events) {
-    onBeginSurvey(events);
+    onTakeSurvey(events);
   }
 
   // Survey Creation:
   // update surveylist state and refresh display of survey page
-  // Note: HARDCODED Data to be removed!!!
   function _createSurvey(events) {
-    console.log("survey created");
+    onCreateSurvey(events);
+  }
 
-    onCreateSurvey({
-      title: "abcd",
-      length: "efgh",
-      description: "ijkl",
-      survey_owner: "mno",
-      closing_date: "1640672139",
-      total_rewards_eth: "1",
-      reward_eth: "0.00001",
-      id: "64bac1-eec-d08f-cf5-00e526c1a0b8",
-      content: [
-        {
-          question: "how are you?",
-          suggestion: "well, okay, bad",
-        },
-        {
-          question: "hello?",
-          suggestion: "",
-        },
-        {
-          question: "pqrz",
-          suggestion: "",
-        },
-      ],
-    });
+  function _getRefund(events) {
+    console.log("Refund remaining credits to survey owner");
+
+    onRefund(events);
   }
 
   return (
     <Container>
       <SurveyPopUp
+        address={selectedAddress}
         survey={selectedValues.data}
         onSubmit={_takeSurvey}
         onShow={selectedValues.modalShow}
@@ -90,11 +80,22 @@ export function SurveyPage({
         onShow={newSurvey.modalShow}
         onHide={() => setNewSurvey({ ...newSurvey, modalShow: false })}
       ></SurveyCreationPopUp>
+      <SurveyRefundPopUp
+        escrowAddress={escrowAddress}
+        selectedAddress={selectedAddress}
+        survey={refundValues.data}
+        onShow={refundValues.modalShow}
+        onHide={() => setRefundValues({ ...refundValues, modalShow: false })}
+        onSubmit={_getRefund}
+      ></SurveyRefundPopUp>
       <Stack gap={4}>
         <Card>
           <Card.Body>
             <Card.Text>Wallet Address: {selectedAddress}</Card.Text>
-            <Card.Text>Network: {networkConnected}</Card.Text>
+            <Card.Text>
+              Network:{" "}
+              {network.name == undefined ? "Unsupported" : network.name}
+            </Card.Text>
             <Card.Text>Balance: {balance}</Card.Text>
           </Card.Body>
         </Card>
@@ -102,31 +103,31 @@ export function SurveyPage({
           <Button
             className="border ms-auto"
             variant="primary"
-            // onClick={() => {
-            //   setNewSurvey({
-            //     ...newSurvey,
-            //     modalShow: true,
-            //   });
-            // }}
             onClick={() => {
-              _createSurvey();
+              setNewSurvey({
+                ...newSurvey,
+                modalShow: true,
+              });
             }}
+            // onClick={() => {
+            //   _createSurvey();
+            // }}
           >
             Create Survey
           </Button>
           <div className="vr" />
-          <Button className="border" variant="primary">
-            Redeem Rewards
+          <Button className="border" variant="primary" disabled>
+            Redeem Rewards (Coming Soon)
           </Button>
         </Stack>
         <Stack gap={1}>
           {surveyList.map((data) => (
             <Card key={data.id}>
               <Card.Body>
-                <Stack direction="horizontal">
+                <Stack direction="horizontal" gap={3}>
                   <Card.Title>{data.title}</Card.Title>
                   <Button
-                    className="ms-auto"
+                    className="border ms-auto"
                     variant="secondary"
                     onClick={() => {
                       setSelectedValues({
@@ -136,21 +137,41 @@ export function SurveyPage({
                       });
                     }}
                   >
-                    Begin Survey
+                    Take Survey
+                  </Button>
+                  <Button
+                    className="border"
+                    variant="secondary"
+                    onClick={() => {
+                      setRefundValues({
+                        ...refundValues,
+                        data: data,
+                        modalShow: true,
+                      });
+                    }}
+                  >
+                    Withdraw Funds
                   </Button>
                 </Stack>
                 <Stack direction="horizontal" gap={3}>
                   <Card.Subtitle>
-                    Survey Creator: {data.survey_owner}
+                    Survey Owner: {data.survey_owner}
                   </Card.Subtitle>
                   <div className="vr" />
                   <Card.Subtitle>
-                    Data Sensitivity: {data.data_sensitivity}
+                    Closing Date: {data.closing_date}
                   </Card.Subtitle>
                   <div className="vr" />
                   <Card.Subtitle className="text-muted">
                     Survey Length: {data.length}
                   </Card.Subtitle>
+                  <Button
+                    className="border ms-auto"
+                    variant="secondary"
+                    disabled
+                  >
+                    Extract Responses (Coming Soon)
+                  </Button>
                 </Stack>
                 <Card.Text gap={2}>{data.description}</Card.Text>
               </Card.Body>
