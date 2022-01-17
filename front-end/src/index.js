@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import { Dapp } from "./Dapp";
+import "./styles/Dapp.css";
 
 // bootstrap framework for styling
 // import "bootstrap/dist/css/bootstrap.css";
