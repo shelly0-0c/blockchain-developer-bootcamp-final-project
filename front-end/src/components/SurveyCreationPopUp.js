@@ -9,7 +9,7 @@ import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import FloatingLabel from "react-bootstrap/esm/FloatingLabel";
 
-export function SurveyCreationPopUp({ survey, onShow, onHide, onSubmit }) {
+export function SurveyCreationPopUp({ onShow, onHide, onSubmit }) {
   const myRefs = useRef([]);
 
   const [metadata, setMetadata] = useState({
@@ -335,7 +335,7 @@ export function SurveyCreationPopUp({ survey, onShow, onHide, onSubmit }) {
         </Modal.Body>
         <Modal.Footer>
           <Button variant="primary" onClick={handleSubmit}>
-            Tokenize & Submit
+            Submit
           </Button>
         </Modal.Footer>
       </Form>

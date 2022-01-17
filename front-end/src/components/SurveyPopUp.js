@@ -4,7 +4,7 @@ import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 
-export function SurveyPopUp({ survey, onShow, onHide, onSubmit }) {
+export function SurveyPopUp({ address, survey, onShow, onHide, onSubmit }) {
   const [item_1, setItem1] = useState("");
   const [item_2, setItem2] = useState("");
   const [item_3, setItem3] = useState("");
@@ -16,7 +16,8 @@ export function SurveyPopUp({ survey, onShow, onHide, onSubmit }) {
     const survey_response = {
       id: survey.id,
       title: survey.title,
-      response: formatted,
+      survey_taker: address,
+      responses: formatted,
     };
 
     onHide(true);
@@ -28,7 +29,7 @@ export function SurveyPopUp({ survey, onShow, onHide, onSubmit }) {
 
     survey.content.forEach((value, index) => {
       const data_obj = {
-        id: value.id,
+        id: index + 1,
         question: value.question,
         answer: allValues_arr[index],
       };
@@ -115,7 +116,7 @@ export function SurveyPopUp({ survey, onShow, onHide, onSubmit }) {
       </Modal.Body>
       <Modal.Footer>
         <Button variant="primary" type="submit" onClick={handleSubmit}>
-          Tokenize & Submit
+          Upload & Submit
         </Button>
       </Modal.Footer>
     </Modal>

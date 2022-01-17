@@ -4,7 +4,7 @@ import Card from "react-bootstrap/Card";
 import Stack from "react-bootstrap/Stack";
 import Button from "react-bootstrap/Button";
 
-export function SurveyCard({ onTakeSurvey, info }) {
+export function SurveyCard({ onTakeSurvey, onCloseSurvey, info }) {
   return (
     <Card>
       <Card.Body>
@@ -17,13 +17,18 @@ export function SurveyCard({ onTakeSurvey, info }) {
           >
             Begin Survey
           </Button>
+          <Button
+            className="ms-auto"
+            variant="secondary"
+            onClick={(events) => onCloseSurvey(events)}
+          >
+            Close Survey
+          </Button>
         </Stack>
         <Stack direction="horizontal" gap={3}>
           <Card.Subtitle>Survey Creator: {info.survey_owner}</Card.Subtitle>
           <div className="vr" />
-          <Card.Subtitle>
-            Data Sensitivity: {info.data_sensitivity}
-          </Card.Subtitle>
+          <Card.Subtitle>Closing Date: {info.closingDate}</Card.Subtitle>
           <div className="vr" />
           <Card.Subtitle className="text-muted">
             Survey Length: {info.length}
