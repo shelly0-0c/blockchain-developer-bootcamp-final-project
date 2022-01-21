@@ -1,10 +1,14 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.5.16 <0.9.0;
-pragma experimental ABIEncoderV2;
+pragma solidity 0.8.0;
+pragma experimental ABIEncoderV2;           // enabled to encode and decode nested arrays and structs, code will be less optimized
 
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "./RewardEscrow.sol";
 
+// @title Collections of survey metadata
+// @author shelly
+// @notice Use this contract for dealing with steps involved in survey creation and survey answering
+// @dev Methods executions are role dependent (creator or respondent)
 contract SurveyProcessor is RewardEscrow {
 
     using SafeMath for uint256;
@@ -16,10 +20,14 @@ contract SurveyProcessor is RewardEscrow {
         uint256 closingDate;          // survey closing date
     }
 
+    // @notice Collection of survey response metadata, for easier extraction by Survey Owner
     struct ResponseResults {
         uint256 totalRecords;           // total records of survey responses
         ResponseInfo[] responses;      
     }
+
+    // @notice About survey response
+    // @dev Describe the reponse, new attributes should be extended here
     struct ResponseInfo {
         address payable erc20Address;    // survey respondant address
         string metadata;                 // response metadata location
@@ -29,12 +37,17 @@ contract SurveyProcessor is RewardEscrow {
     address payable escrowAddress;
 
     // @notice surveys owned by survey creator
-    // @dev survey id mapped to survey owner key with SurveyInfo struct
+    // @dev survey id mapped to survey owner address (key) with SurveyInfo struct (value)
     mapping (string => mapping(address => SurveyInfo)) surveys;
 
     // @notice survey responses metadata file location 
-    // @dev survey id mapped to survey owner key with responses metadata location as values
+    // @dev survey id mapped to collection of survey responses
     mapping (string => ResponseResults) responses;
+
+    // @dev using mutual exclusion to prevent re-entrancy attack
+    bool private lockBalances;
+    bool private lock;
+
 
     /**
      * Events
@@ -42,34 +55,29 @@ contract SurveyProcessor is RewardEscrow {
 
     // @notice Emitted when survey is created successfully
     // @param surveyOwner Survey Creator address
-    // @param surveyId CID of survey
+    // @param surveyId ID of survey
     event LogSurveyRegistered(address surveyOwner, string surveyId);
 
     // @notice Emitted when survey is removed successfully
     // @param surveyOwner Survey Creator address
-    // @param surveyId CID of survey
+    // @param surveyId ID of survey
     event LogSurveyRemoved(address surveyOwner, string surveyId);
 
     // @notice Emitted when survey response is submitted successfully
     // @param respondent Survey Respondent address
-    // @param surveyId CID of survey
+    // @param surveyId ID of survey
     // @param totalResponses total number of responses for the survey
     event LogSurveyResponseSubmitted(address respondent, string surveyId, uint256 totalResponses);
 
     // @notice Emitted when survey response exists
     // @param respondent Survey Respondent address
-    // @param surveyId CID of survey
+    // @param surveyId ID of survey
     event LogSurveyResponseExists(address respondent, string surveyId);
 
-    // @notice Emitted when rewards meant for survey are deposited into RewardEscrow Contract
+    // @notice Emitted when rewards meant for survey are deposited into RewardEscrow Contract by Survey Creator
     // @param surveyOwner Survey Creator address
     // @param amount Total Rewards
     event LogRewardTransferToEscrow(address surveyOwner, uint256 amount);
-
-    // @notice Emitted when the reward is deducted from reward escrow account of the survey
-    // @param surveyId CID of survey
-    // @param amountDeducted Reward per response deducted
-    event LogDeductBalanceFromPool(string surveyId, uint256 amountDeducted);
 
     /**
      * Modifiers
@@ -91,12 +99,12 @@ contract SurveyProcessor is RewardEscrow {
     }
 
     modifier surveyIsNotClosed(string memory _surveyId) {
-        require(block.timestamp < surveys[_surveyId][msg.sender].closingDate, "Survey is closed");
+        require(block.timestamp < surveys[_surveyId][msg.sender].closingDate, "Survey is closed.");
         _;
     }
 
     modifier escrowAddrIsSet() {
-        require(escrowAddress != address(0));
+        require(escrowAddress != address(0), "Escrow Address is not set.");
         _;
     }
 
@@ -107,17 +115,6 @@ contract SurveyProcessor is RewardEscrow {
 
     modifier paidEnough(uint256 _amount) {
         require(msg.value >= _amount, "Not Paid Enough.");
-        _;
-    }
-
-    modifier balanceEnough(string memory _surveyId, uint256 _totalAmountToDeduct) {
-        require(_totalAmountToDeduct < getTotalDistributableRewardsOfSurvey(_surveyId));
-        _;
-    }
-
-    modifier validateDeposit(RewardPoolInfo memory _rewardPool) {
-        require(_rewardPool.totalRewards <= address(msg.sender).balance , "Survey Creator's token balance is not enough.");
-        require(_rewardPool.rewardPerResponse > 0, "Reward per response needs to be greater than 0.");
         _;
     }
 
@@ -148,30 +145,22 @@ contract SurveyProcessor is RewardEscrow {
         return escrowAddress;
     }
 
-    // @notice For overwriting Survey Processor Contract address in Reward Escrow Contract
-    // @param _address Survey Processor contract address
-    function setSurveyProcessorAddress(address payable _address) public {
-        RewardEscrow(escrowAddress).setAgent(_address);
-    }
-
     // @notice Check if Survey ID is stored
     // @dev Survey ID is stored in surveys mapping, and Survey ID cannot be empty string
     // @param _surveyId Survey ID
     // @param _surveyOwner Address of survey creator
-    // @return Survey ID
+    // @return Boolean true/false if surveyId exists or not
     function checkSurveyIdExists(string memory _surveyId, address _surveyOwner) external view returns (bool) {
         if (bytes(surveys[_surveyId][_surveyOwner].surveyId).length > 0) {
             return true;
         }
-
         return false;
-        // return surveys[_surveyId][_surveyOwner].surveyId;
     }
  
 
-    // @notice Deposit ETH to Reward Escrow Contract, while saving Reward Pool Information 
+    // @notice Registering new survey
     // @dev For the registration to work, Escrow Contract address must be assigned, _reward must not be 0 and 
-    //      ETH amount specified in _totalRewards must be transferred
+    //      ETH amount specified in _totalRewards must be transferred to Escrow Contract
     // @param _surveyId Survey ID
     // @param _totalRewards Total ETH Rewards to distribute for survey
     // @param _reward Reward per survey response
@@ -181,14 +170,20 @@ contract SurveyProcessor is RewardEscrow {
         RewardPoolInfo memory pool = RewardPoolInfo({erc20Address: payable(msg.sender), totalRewards: _totalRewards, rewardPerResponse: _reward});
         SurveyInfo memory survey = SurveyInfo({surveyId: _surveyId, closingDate: _closingDate});
         
+        surveys[_surveyId][msg.sender] = survey;
+
+        require(!lockBalances);
+
+        lockBalances = true;
+
         bool success = _deposit(pool, _surveyId);
-        require(success);
+        require(success, "Transfer failed");
         
         emit LogRewardTransferToEscrow(msg.sender, _totalRewards);
 
-        surveys[_surveyId][msg.sender] = survey;
-
         RewardEscrow(escrowAddress).setSurveyOwner(_surveyId, msg.sender);
+        lockBalances = false;
+
         emit LogSurveyRegistered(msg.sender, _surveyId);
     }
 
@@ -230,11 +225,15 @@ contract SurveyProcessor is RewardEscrow {
         
         uint256 totalResponses = responses[_surveyId].totalRecords;
         
+        require(!lockBalances);
+        lockBalances = true;
+
         bool success = RewardEscrow(escrowAddress).refundRemaining(_surveyId, totalResponses);
         require(success, "Transfer failed.");
 
         // if the transfer to Survey Owner succeeds, ETH balance of Reward Escrow before and after should be different
         delete surveys[_surveyId][msg.sender];
+        lockBalances = false;
         emit LogSurveyRemoved(msg.sender, _surveyId);
     }
 
@@ -247,11 +246,25 @@ contract SurveyProcessor is RewardEscrow {
         uint256 totalResponsesBeforeUpdate = responses[_surveyId].totalRecords;
         uint256 newTotal = totalResponsesBeforeUpdate + 1;
 
-        require(newTotal.mul(getRewardPerResponseOfSurvey(_surveyId)) < getTotalDistributableRewardsOfSurvey(_surveyId));
+        require(!lock);
+        lock = true;
+
+        require(newTotal.mul(getRewardPerResponseOfSurvey(_surveyId)) < getTotalDistributableRewardsOfSurvey(_surveyId), "No more rewards to give out for this survey.");
         
         responses[_surveyId].totalRecords = totalResponsesBeforeUpdate + 1;
         responses[_surveyId].responses.push(response);
+        
+        lock = false;
+
         emit LogSurveyResponseSubmitted(msg.sender, _surveyId, responses[_surveyId].totalRecords);
+    }
+
+    // @notice For survey owner to download a copy of responses
+    // @dev TODO: once downloaded, the responses with respect to the survey id will be deleted
+    // @param _surveyId Survey ID
+    // @return ResponseResults struct
+    function extractSurveyResponses() external view {
+        //TODO
     }
     
 
