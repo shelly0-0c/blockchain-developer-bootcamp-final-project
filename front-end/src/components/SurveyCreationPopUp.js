@@ -9,14 +9,14 @@ import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import FloatingLabel from "react-bootstrap/esm/FloatingLabel";
 
-export function SurveyCreationPopUp({ onShow, onHide, onSubmit }) {
+export function SurveyCreationPopUp({ address, onShow, onHide, onSubmit }) {
   const myRefs = useRef([]);
 
   const [metadata, setMetadata] = useState({
     title: "",
     length: "",
     description: "",
-    survey_owner: "",
+    survey_owner: address,
     closing_date: "",
     total_rewards_eth: "",
     reward_eth: "",
@@ -131,7 +131,7 @@ export function SurveyCreationPopUp({ onShow, onHide, onSubmit }) {
                     return { ...prevState, description: event.target.value };
                   });
                 }}
-                onKeyPress={(e) => handleKeyEnter(e, myRefs.current[4])}
+                onKeyPress={(e) => handleKeyEnter(e, myRefs.current[5])}
                 ref={(el) => (myRefs.current[3] = el)}
                 key="3"
               />
@@ -143,18 +143,7 @@ export function SurveyCreationPopUp({ onShow, onHide, onSubmit }) {
               <span style={{ color: "red" }}>*</span>
             </Form.Label>
             <Col sm={10}>
-              <Form.Control
-                type="text"
-                required
-                onChange={(event) => {
-                  setMetadata((prevState) => {
-                    return { ...prevState, survey_owner: event.target.value };
-                  });
-                }}
-                onKeyPress={(e) => handleKeyEnter(e, myRefs.current[5])}
-                ref={(el) => (myRefs.current[4] = el)}
-                key="4"
-              />
+              <span>{metadata.survey_owner}</span>
             </Col>
           </Form.Group>
           <fieldset>

@@ -25,8 +25,7 @@ const ROPSTEN_NETWORK_ID = "3";
 
 const ETHEREUM_NETWORK = {
   "0x539": "Ganache",
-  "0x3": "Ropsten",
-  "0x4": "Rinkeby",
+  "0x42": "Kovan",
 };
 
 export class Dapp extends React.Component {
@@ -104,7 +103,6 @@ export class Dapp extends React.Component {
 
   componentDidMount() {
     this._initializeEthers();
-    // this._initializeData();
     this._initializeNFTStorageClient();
   }
 
@@ -186,32 +184,33 @@ export class Dapp extends React.Component {
           }));
         }
       );
-    });
 
-    this._rewardEscrowContract.on(
-      "LogReturnRemainingCredit",
-      (surveyId, recipient) => {
+      this._rewardEscrowContract.on(
+        "LogReturnRemainingCredit",
+        (surveyId, recipient) => {
+          this.setState((prevState) => ({
+            ...prevState,
+            tx: {
+              info: `Remaining ETH esrowed from ${surveyId} returned to ${recipient}`,
+              showInfo: true,
+            },
+          }));
+        }
+      );
+
+      this._surveyContract.on("LogSurveyRemoved", (surveyOwner, surveyId) => {
         this.setState((prevState) => ({
           ...prevState,
           tx: {
-            info: `Remaining ETH esrowed from ${surveyId} returned to ${recipient}`,
+            info: `Survey with ID: ${surveyId} owned by ${surveyOwner} is removed`,
             showInfo: true,
           },
+          loading: {
+            status: false,
+            message: "",
+          },
         }));
-      }
-    );
-
-    this._surveyContract.on("LogSurveyRemoved", (surveyOwner, surveyId) => {
-      this.setState((prevState) => ({
-        ...prevState,
-        tx: {
-          info: `Survey with ID: ${surveyId} owned by ${surveyOwner} is removed`,
-          showInfo: true,
-        },
-        loading: {
-          status: false,
-        },
-      }));
+      });
     });
   }
 
@@ -419,11 +418,11 @@ export class Dapp extends React.Component {
           balance: ethers.utils.formatEther(latestBalance),
           ipfs: {
             showInfo: true,
-            info: `Uploaded to IPFS Metadata URL:\n ${metadataUrl}`,
+            info: `Uploaded to IPFS. Metadata URL:\n ${metadataUrl}`,
           },
           loading: {
             status: true,
-            message: `Uploaded to IPFS Metadata URL:\n ${metadataUrl}`,
+            message: `Uploaded to IPFS. Metadata URL:\n ${metadataUrl}`,
           },
         }));
       }
@@ -474,6 +473,9 @@ export class Dapp extends React.Component {
       if (receipt.status) {
         this.setState((prevState) => ({
           ...prevState,
+          loading: {
+            status: false,
+          },
           balance: ethers.utils.formatEther(latestBalance),
           surveys: prevState.surveys.filter((each) => each.id != surveyId),
         }));

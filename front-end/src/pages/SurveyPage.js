@@ -75,6 +75,7 @@ export function SurveyPage({
         }
       ></SurveyPopUp>
       <SurveyCreationPopUp
+        address={selectedAddress}
         survey={newSurvey.data}
         onSubmit={_createSurvey}
         onShow={newSurvey.modalShow}
