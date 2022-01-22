@@ -68,7 +68,7 @@
 
 > You will encounter below ERROR when running front-end code. It's due to nft.storage service the project depends on.
 
-<mark>Failed to compile</mark>
+<mark style="background-color: lightblue">Failed to compile</mark>
 ```
 ./node_modules/nft.storage/src/platform.web.js
 Module not found: Can't resolve 'ipfs-car/blockstore/memory' in '/Users/shelly/Documents/BlkC/consensys/blockchain-developer-bootcamp-final-project/front-end/node_modules/nft.storage/src'
