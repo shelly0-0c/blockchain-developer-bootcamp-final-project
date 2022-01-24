@@ -4,8 +4,9 @@
         "title": "Product Satisfaction Survey",
         "length": "10 mins",
         "description": "To better understand the needs and find improvement points.",
-        "survey_owner": "Company A",
+        "survey_owner": "0x28d79ad8aud98s88dada89aDaAdAad777s7dya112",
         "data_sensitivy": "Low",
+        "closing_date": "1644771636",
         "content": [
             {
                 "id": "1",
@@ -30,8 +31,9 @@
         "title": "Vacation Travel Survey",
         "length": "5 mins",
         "description": "To understand traveller's behaviors and preferences.",
-        "survey_owner": "Company B",
+        "survey_owner": "0x3D6a782ADxasdaw292897012907093210xa0",
         "data_sensitivity": "High",
+        "closing_date": "1643562036",
         "content": [
             {
                 "id": "1",
