@@ -20,7 +20,7 @@
 
 const HDWalletProvider = require("@truffle/hdwallet-provider");
 const fs = require("fs");
-const mnemonic = fs.readFileSync(".secret").toString().trim();
+const secrets = JSON.parse(fs.readFileSync(".secrets.json").toString().trim());
 
 module.exports = {
   /**
@@ -56,14 +56,14 @@ module.exports = {
     // },
     // Useful for deploying to a public network.
     // NB: It's important to wrap the provider as a function.
-    kovan: {
+    rinkeby: {
       networkCheckTimeout: 10000,
       provider: () =>
         new HDWalletProvider(
-          mnemonic,
-          `wss://kovan.infura.io/ws/v3/${secrets.projectId}`
+          secrets.mnemonic,
+          `wss://rinkeby.infura.io/ws/v3/${secrets.projectId}`
         ),
-      network_id: 42, // Kovan's id
+      network_id: 4, // Rinkeby's id
       confirmations: 2, // # of confs to wait between deployments. (default: 0)
       timeoutBlocks: 200, // # of blocks before a deployment times out  (minimum/default: 50)
       skipDryRun: true, // Skip dry run before migrations? (default: false for public nets )
