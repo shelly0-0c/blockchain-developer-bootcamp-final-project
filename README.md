@@ -1,5 +1,41 @@
 # blockchain-developer-bootcamp-final-project
 
+
+## DApp URL
+https://survey-dapp.netlify.app/
+
+## Contracts deployed at Rinkeby Testnet
+
+RewardEscrow Contract - 0x8D3C63E39C06a1935De645f0Fd5F7f19a8569CC1
+SurveyProcessor Contract - 0x556F8d9DB23EDf2Bc8066b97AF494538Bf2324A3
+## Screencast link
+
+
+
+## Project description
+
+Take surveys and earn ETH.
+
+## Workflow Implemented
+
+Survey Owner
+1. Enter web site
+2. Login with Metamask
+3. Create a set of Survey Questions
+5. Agree on survey owner address (used for excess ETH withdrawal), specify amount to reward for each response and total amount of ETH for survey locked in escrow contract (smart contract call)
+6. Interact with Survey Processor Contract to register survey to survey owner address
+7. Intearct with Survey Processor Contract to withdraw excess ETH deposited in Reward Escrow Contract
+
+Survey Respondent
+1. Enter web site
+2. Login with Metamask
+3. Browse surveys
+4. Select survey and answer
+5. Survey response and its metadata is uploade to IPFS
+6. Interact with Survey Processor Contract to save the location of survey response metadata
+
+
+
 ## Directory Structure
 ![folder structure](./dir_struct.png)
 
@@ -105,38 +141,6 @@ Ref: https://stackoverflow.com/questions/70063600/cant-resolve-ipfs-car-blocksto
         $ cd blockchain-developer-bootcamp-final-project
         $ truffle test
     ```
-
-
-### Contracts deployed at Rinkeby Testnet
-
-RewardEscrow Contract - 0x8D3C63E39C06a1935De645f0Fd5F7f19a8569CC1
-SurveyProcessor Contract - 0x556F8d9DB23EDf2Bc8066b97AF494538Bf2324A3
-## Screencast link
-
-
-
-## Project description
-
-Take surveys and earn ETH.
-
-## Workflow Implemented
-
-Survey Owner
-1. Enter web site
-2. Login with Metamask
-3. Create a set of Survey Questions
-5. Agree on survey owner address (used for excess ETH withdrawal), specify amount to reward for each response and total amount of ETH for survey locked in escrow contract (smart contract call)
-6. Interact with Survey Processor Contract to register survey to survey owner address
-7. Intearct with Survey Processor Contract to withdraw excess ETH deposited in Reward Escrow Contract
-
-Survey Respondent
-1. Enter web site
-2. Login with Metamask
-3. Browse surveys
-4. Select survey and answer
-5. Survey response and its metadata is uploade to IPFS
-6. Interact with Survey Processor Contract to save the location of survey response metadata
-
 ## Improvements under consideration for next iteration 
 1. Storing survey responses privately, either stored them off-chain or add encryption to content uploaded to ipfs
 2. Survey taker takes survey without knowing that there are no more rewards to earn. (reward per response * num survey takers > total rewards in escrow contract). This wastes survey taker's time, with no return on the time invested.
