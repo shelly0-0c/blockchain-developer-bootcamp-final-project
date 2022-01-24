@@ -56,6 +56,9 @@
     - Refer to Reward Escrow contract deployed, assign the contract address to REACT_APP_REWARD_ESCROW_CONTRACT  
 
 
+    ![.env](./env_file.png)
+
+
 7. Start UI locally
 
     ```
@@ -104,8 +107,10 @@ Ref: https://stackoverflow.com/questions/70063600/cant-resolve-ipfs-car-blocksto
     ```
 
 
-### Deploying smart contract to test network
+### Contracts deployed at Rinkeby Testnet
 
+RewardEscrow Contract - 0x8D3C63E39C06a1935De645f0Fd5F7f19a8569CC1
+SurveyProcessor Contract - 0x556F8d9DB23EDf2Bc8066b97AF494538Bf2324A3
 ## Screencast link
 
 
@@ -139,4 +144,4 @@ Survey Respondent
 4. Reard Escrow contract only allowing calls from Survey Processor contract
 5. Survey taker cannot respond to the same survey
 6. Survey taker redeem accumulated rewards
-
+7. Transform Survey Closing Date to Human Readable format. Currently, it is in UNIX timestamp.
