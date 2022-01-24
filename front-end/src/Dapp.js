@@ -25,7 +25,7 @@ const ROPSTEN_NETWORK_ID = "3";
 
 const ETHEREUM_NETWORK = {
   "0x539": "Ganache",
-  "0x4": "Rinkeby",
+  "0x04": "Rinkeby",
 };
 
 export class Dapp extends React.Component {
