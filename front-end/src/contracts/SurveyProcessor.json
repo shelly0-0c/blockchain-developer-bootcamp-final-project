@@ -31256,10 +31256,16 @@
       "links": {},
       "address": "0x556F8d9DB23EDf2Bc8066b97AF494538Bf2324A3",
       "transactionHash": "0x8de3e4deee3901afff1f600d3c7de86d0430c381bbc51cbbdb95be45da8b646b"
+    },
+    "5777": {
+      "events": {},
+      "links": {},
+      "address": "0x8284454A0dd5384803F53311AfC895106B74F048",
+      "transactionHash": "0x8f4c6101873603c05a8e1581480af22b1d15283808759dd8b77791e4a692beda"
     }
   },
   "schemaVersion": "3.4.3",
-  "updatedAt": "2022-01-24T14:09:31.879Z",
+  "updatedAt": "2022-02-06T09:38:26.337Z",
   "networkType": "ethereum",
   "devdoc": {
     "kind": "dev",
