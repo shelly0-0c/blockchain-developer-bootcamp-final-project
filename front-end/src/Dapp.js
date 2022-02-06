@@ -164,10 +164,6 @@ export class Dapp extends React.Component {
               ...prevState.responses,
               [`${surveyId}`]: parseInt(totalResponses),
             },
-            loading: {
-              ...prevState.loading,
-              isBtnDisabled: false,
-            },
           }));
         }
       );
@@ -422,6 +418,7 @@ export class Dapp extends React.Component {
           },
           loading: {
             status: true,
+            isBtnDisabled: false,
             message: `Uploaded to IPFS. Metadata URL:\n ${metadataUrl}`,
           },
         }));
