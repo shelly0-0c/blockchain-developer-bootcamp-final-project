@@ -16,7 +16,7 @@ export function SurveyCreationPopUp({ address, onShow, onHide, onSubmit }) {
     title: "",
     length: "",
     description: "",
-    survey_owner: address,
+    survey_owner: "",
     closing_date: "",
     total_rewards_eth: "",
     reward_eth: "",
@@ -48,6 +48,7 @@ export function SurveyCreationPopUp({ address, onShow, onHide, onSubmit }) {
       ...metadata,
       id: id,
       content: allQuestions,
+      survey_owner: address,
     };
     return data_obj;
   }
@@ -143,7 +144,7 @@ export function SurveyCreationPopUp({ address, onShow, onHide, onSubmit }) {
               <span style={{ color: "red" }}>*</span>
             </Form.Label>
             <Col sm={10}>
-              <span>{metadata.survey_owner}</span>
+              <span>{address}</span>
             </Col>
           </Form.Group>
           <fieldset>
