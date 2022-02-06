@@ -25,7 +25,7 @@ const ROPSTEN_NETWORK_ID = "3";
 
 const ETHEREUM_NETWORK = {
   "0x539": "Ganache",
-  "0x04": "Rinkeby",
+  "0x4": "Rinkeby",
 };
 
 export class Dapp extends React.Component {
@@ -163,10 +163,6 @@ export class Dapp extends React.Component {
             responses: {
               ...prevState.responses,
               [`${surveyId}`]: parseInt(totalResponses),
-            },
-            loading: {
-              ...prevState.loading,
-              isBtnDisabled: false,
             },
           }));
         }
@@ -422,6 +418,7 @@ export class Dapp extends React.Component {
           },
           loading: {
             status: true,
+            isBtnDisabled: false,
             message: `Uploaded to IPFS. Metadata URL:\n ${metadataUrl}`,
           },
         }));
